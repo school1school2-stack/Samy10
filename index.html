@@ -573,7 +573,8 @@
         function initCloudSync() {
             if (!db) return;
 
-            db.collection("allowed_students").onSnapshot(snapshot => {
+            // مسار مستقل خاص بالأساتذة (allowed_students_khaled)
+            db.collection("allowed_students_khaled").onSnapshot(snapshot => {
                 allowedStudentsCache = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -586,7 +587,8 @@
                 filterAllowedStudents('');
             });
 
-            db.collection("app_data").doc("main_state").onSnapshot(doc => {
+            // مسار مستقل خاص بحالة البيانات والدرجات (main_state_khaled)
+            db.collection("app_data").doc("main_state_khaled").onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.students) students = data.students;
@@ -604,7 +606,7 @@
                     renderTable();
                 }
             }, err => {
-                db.collection("app_data").doc("main_state").get().then(d => {
+                db.collection("app_data").doc("main_state_khaled").get().then(d => {
                     if (d.exists) {
                         const data = d.data();
                         if (data.students) students = data.students;
@@ -631,7 +633,7 @@
                 if (std) {
                     renderDirectStudentReport(std);
                 } else if (db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             let foundStd = students.find(s => s.email && s.email.toLowerCase().trim() === targetEmail);
@@ -654,7 +656,7 @@
                 hasOpenedReportFromUrl = true;
 
                 if (students.length === 0 && db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             renderDirectClassReport(targetClass);
@@ -670,7 +672,7 @@
                 hasOpenedReportFromUrl = true;
 
                 if (students.length === 0 && db) {
-                    db.collection("app_data").doc("main_state").get().then(doc => {
+                    db.collection("app_data").doc("main_state_khaled").get().then(doc => {
                         if (doc.exists && doc.data().students) {
                             students = doc.data().students;
                             renderDirectChartReport(targetClass);
@@ -1399,7 +1401,7 @@
             }
 
             try {
-                const snap = await db.collection("allowed_students").get();
+                const snap = await db.collection("allowed_students_khaled").get();
                 let addedCount = 0;
 
                 if (snap.empty) {
@@ -1809,7 +1811,7 @@
 
             if (db) {
                 try {
-                    const doc = await db.collection("app_data").doc("main_state").get();
+                    const doc = await db.collection("app_data").doc("main_state_khaled").get();
                     if (doc.exists && doc.data().students) {
                         students = doc.data().students;
                     }
@@ -1860,13 +1862,14 @@
         async function saveAllToCloud() {
             if (!db) return;
             try {
-                await db.collection("app_data").doc("main_state").set({
+                // حفظ البيانات في المسار المستقل الخاص بك (main_state_khaled)
+                await db.collection("app_data").doc("main_state_khaled").set({
                     students: students,
                     classes: customClasses,
                     sectionsConfig: twoRowsSectionsConfig,
                     updatedAt: new Date().toLocaleString('ar-SA')
                 });
-                showToast("تم حفظ صفوف الأقسام والدرجات بالسحابة بنجاح! 💾");
+                showToast("تم حفظ صفوف الأقسام والدرجات في سحابك الخاص بنجاح! 💾");
             } catch(e) {
                 console.error("Cloud save error:", e);
                 showToast("تعذرت المزامنة بالسحابة.", "error");
