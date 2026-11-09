@@ -115,7 +115,7 @@
                         <button onclick="toggleDropdown('studentsDropdown', event)" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-sm">
                             <i class="fas fa-users-cog"></i> إدارة الطلاب والرفع <i class="fas fa-chevron-down text-[10px] mr-1"></i>
                         </button>
-                        <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 font-black">
+                        <div id="studentsDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 font-black">
                             <button onclick="openAddStudentModal()" class="w-full text-right px-4 py-2 text-xs font-black text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
                                 <i class="fas fa-user-plus text-blue-600"></i> إضافة طالب
                             </button>
@@ -124,6 +124,12 @@
                             </button>
                             <button onclick="openBulkImportModal()" class="w-full text-right px-4 py-2 text-xs font-black text-slate-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2">
                                 <i class="fas fa-file-import text-amber-600"></i> رفع جماعي
+                            </button>
+                            <button onclick="copyClassStudentsNamesAndEmails()" class="w-full text-right px-4 py-2 text-xs font-black text-emerald-800 hover:bg-emerald-50 flex items-center gap-2 border-t border-slate-100">
+                                <i class="fas fa-copy text-emerald-600"></i> نسخ أسماء وإيميلات طلاب الفصل 📋
+                            </button>
+                            <button onclick="copyClassStudentsReportsLinks()" class="w-full text-right px-4 py-2 text-xs font-black text-teal-800 hover:bg-teal-50 flex items-center gap-2">
+                                <i class="fas fa-link text-teal-600"></i> نسخ روابط تقارير طلاب الفصل 🔗
                             </button>
                         </div>
                     </div>
@@ -328,7 +334,7 @@
             </div>
             <div class="p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50 font-black">
                 <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-black">
-                    💡 كل فرع يحسب أفضل محاولة من الـ 10 درجات، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
+                    💡 كل فرع يحسب أفضل محاولة بصيغة "الأفضل: الدرجة / الحد الأعلى"، ثم يجمع النظام الأقسام ليخرج بالنتيجة النهائية.
                 </div>
                 <div id="sectionsConfigEditorContainer" class="space-y-6"></div>
             </div>
@@ -415,6 +421,46 @@
                 <div class="flex justify-between items-center pt-2">
                     <button onclick="processBulkStudents()" class="px-5 py-2.5 bg-amber-600 text-white rounded-xl text-xs font-black"><i class="fas fa-rocket"></i> معالجة والرفع للسحابة</button>
                     <button onclick="closeModal('bulkImportModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة اختيار الفصل لنسخ الأسماء والإيميلات -->
+    <div id="classNamesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden font-black">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-copy text-amber-400"></i> نسخ أسماء وإيميلات الفصل</h3>
+                <button onclick="closeModal('classNamesModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">اختر الفصل المراد نسخ بيانات طلابه:</label>
+                    <select id="copyNamesClassSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800"></select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('classNamesModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">إلغاء</button>
+                    <button onclick="executeCopyClassNamesAndEmails()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-sm">نسخ القائمة 📋</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة اختيار الفصل لنسخ روابط التقارير -->
+    <div id="classLinksModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden font-black">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm flex items-center gap-2"><i class="fas fa-link text-amber-400"></i> نسخ روابط تقارير طلاب الفصل</h3>
+                <button onclick="closeModal('classLinksModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">اختر الفصل المراد نسخ روابط طلابه:</label>
+                    <select id="copyLinksClassSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800"></select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('classLinksModal')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">إلغاء</button>
+                    <button onclick="executeCopyClassLinks()" class="px-5 py-2.5 bg-teal-600 text-white rounded-xl text-xs font-black shadow-sm">نسخ الروابط 🔗</button>
                 </div>
             </div>
         </div>
@@ -697,7 +743,6 @@
             renderTable();
         }
 
-        // إيجاد أفضل محاولة للفرع
         function getBestSlotScore(student, slots) {
             let maxScore = 0;
             slots.forEach(slot => {
@@ -707,7 +752,11 @@
             return maxScore;
         }
 
-        // حساب مجموع أفضل الدرجات للقسم الكلي والمجموع النهائي العام
+        // حساب الحد الأقصى الكلي للفرعي (مجموع الدرجات القصوى لكل المحاولات داخل هذا الفرع)
+        function getColumnMaxTotal(slots) {
+            return slots.reduce((sum, slot) => sum + (parseFloat(slot.max) || 0), 0);
+        }
+
         function calculateCategoryTotals(student) {
             let oralTotal = 0;
             let writtenTotal = 0;
@@ -799,11 +848,12 @@
                 mainSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let best = getBestSlotScore(std, col.slots);
+                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     reportHTML += `
                         <div class="p-3 rounded-xl border ${colColor} space-y-2">
-                            <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between">
+                            <div class="text-xs font-black border-b pb-1 mb-1 flex justify-between items-center">
                                 <span>${col.subTitle}</span>
-                                <span class="text-blue-700 bg-white px-1.5 py-0.5 rounded text-[10px]">الأفضل: ${best}/10</span>
+                                <span class="text-blue-900 bg-white px-2 py-0.5 rounded text-[11px] font-black shadow-2xs">الأفضل: ${best} / ${colMaxTotal}</span>
                             </div>
                             <div class="space-y-1">
                     `;
@@ -812,7 +862,7 @@
                         reportHTML += `
                             <div class="flex justify-between items-center text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200">
                                 <span class="text-slate-600 font-black">${slot.title}</span>
-                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">/ 10</span></span>
+                                <span class="font-black text-slate-900">${scoreVal} <span class="text-[10px] text-slate-400 font-normal">من ${slot.max}</span></span>
                             </div>
                         `;
                     });
@@ -882,7 +932,8 @@
                 twoRowsSectionsConfig.forEach(mainSec => {
                     mainSec.columns.forEach((col, cIdx) => {
                         let colColor = columnColors[cIdx % columnColors.length];
-                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle}</th>`;
+                        let colMaxTotal = getColumnMaxTotal(col.slots);
+                        html += `<th class="p-2 border-l border-slate-700 ${colColor}">${col.subTitle} (الأفضل من ${colMaxTotal})</th>`;
                     });
                     html += `<th class="p-2 border-l border-slate-700 bg-emerald-900 text-emerald-300">مجموع القسم</th>`;
                 });
@@ -913,7 +964,8 @@
                         mainSec.columns.forEach((col, cIdx) => {
                             let colColor = columnColors[cIdx % columnColors.length];
                             let best = getBestSlotScore(st, col.slots);
-                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best}</td>`;
+                            let colMaxTotal = getColumnMaxTotal(col.slots);
+                            subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 ${colColor} font-black text-slate-900">${best} / ${colMaxTotal}</td>`;
                         });
                         let secTotal = totals.sectionTotals[mIdx] || 0;
                         subCellsHTML += `<td class="p-2 text-center border-l border-slate-300 bg-emerald-50 text-emerald-900 font-black">${secTotal}</td>`;
@@ -1079,6 +1131,77 @@
             });
             html += `</div></div>`;
             return html;
+        }
+
+        function copyClassStudentsNamesAndEmails() {
+            const select = document.getElementById('copyNamesClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classNamesModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassNamesAndEmails() {
+            const className = document.getElementById('copyNamesClassSelect').value;
+            closeModal('classNamesModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            let textOutput = "";
+            classStudents.forEach(st => {
+                textOutput += `${st.name}\n${st.email}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ أسماء وإيميلات طلاب الفصل (${className}) بنجاح جاهزة للصق في الرفع الجماعي! 📋`);
+            });
+        }
+
+        function copyClassStudentsReportsLinks() {
+            const select = document.getElementById('copyLinksClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classLinksModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassLinks() {
+            const className = document.getElementById('copyLinksClassSelect').value;
+            closeModal('classLinksModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            const baseUrl = window.location.href.split('#')[0];
+            let textOutput = `🔗 روابط تقارير طلاب الفصل (${className}) - أ / خالد بن محمد الشثري\n-----------------------------------\n`;
+            
+            classStudents.forEach((st, idx) => {
+                const reportUrl = `${baseUrl}#report=${encodeURIComponent(st.email.trim())}`;
+                textOutput += `${idx + 1}. ${st.name}: ${reportUrl}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ روابط تقارير جميع طلاب الفصل (${className}) بنجاح! 📋`);
+            });
         }
 
         function openClassReportModal(mode) {
@@ -1522,11 +1645,12 @@
                 currentSec.columns.forEach((col, cIdx) => {
                     let colColor = columnColors[cIdx % columnColors.length];
                     let bestScore = getBestSlotScore(st, col.slots);
+                    let colMaxTotal = getColumnMaxTotal(col.slots);
                     cardsHTML += `
                         <div class="p-4 rounded-2xl border-2 ${colColor} space-y-3 shadow-2xs">
                             <div class="text-xs font-black border-b border-slate-200/60 pb-2 mb-2 flex justify-between items-center">
                                 <span class="text-slate-900 font-black">${col.subTitle}</span>
-                                <span class="text-[11px] bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-blue-700 font-black">الأفضل: ${bestScore} / 10</span>
+                                <span class="text-[11px] bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-blue-900 font-black shadow-2xs">الأفضل: ${bestScore} / ${colMaxTotal}</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
                     `;
@@ -1534,12 +1658,13 @@
                     col.slots.forEach(slot => {
                         let scoreVal = st.scores && (st.scores[slot.id] !== undefined) ? st.scores[slot.id] : '';
                         cardsHTML += `
-                            <div class="text-center bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-400 transition">
-                                <div class="text-[10px] text-slate-500 font-black mb-1.5">${slot.title}</div>
-                                <input type="number" step="0.5" min="0" max="10" 
+                            <div class="text-center bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-400 transition space-y-1">
+                                <div class="text-[10px] text-slate-500 font-black">${slot.title}</div>
+                                <input type="number" step="0.5" min="0" max="${slot.max}" 
                                     value="${scoreVal}" 
-                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, 10)" 
-                                    class="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: 10">
+                                    onchange="updateStudentScore('${st.id}', '${slot.id}', this.value, ${slot.max})" 
+                                    class="w-full text-center py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 focus:outline-none focus:border-blue-600 transition" title="الحد الأقصى: ${slot.max}">
+                                <div class="text-[9px] text-slate-400 font-black tracking-tighter">من ${slot.max}</div>
                             </div>
                         `;
                     });
@@ -1890,6 +2015,77 @@
             icon.className = type === 'error' ? "fas fa-exclamation-circle text-rose-400 text-base" : "fas fa-check-circle text-emerald-400 text-base";
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        function copyClassStudentsNamesAndEmails() {
+            const select = document.getElementById('copyNamesClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classNamesModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassNamesAndEmails() {
+            const className = document.getElementById('copyNamesClassSelect').value;
+            closeModal('classNamesModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            let textOutput = "";
+            classStudents.forEach(st => {
+                textOutput += `${st.name}\n${st.email}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ أسماء وإيميلات طلاب الفصل (${className}) بنجاح جاهزة للصق في الرفع الجماعي! 📋`);
+            });
+        }
+
+        function copyClassStudentsReportsLinks() {
+            const select = document.getElementById('copyLinksClassSelect');
+            let html = '';
+            customClasses.forEach(c => {
+                html += `<option value="${c}">${c}</option>`;
+            });
+            select.innerHTML = html;
+            const currentFilter = document.getElementById('classFilter').value;
+            if (currentFilter && currentFilter !== 'all') {
+                select.value = currentFilter;
+            }
+            document.getElementById('classLinksModal').classList.remove('hidden');
+        }
+
+        function executeCopyClassLinks() {
+            const className = document.getElementById('copyLinksClassSelect').value;
+            closeModal('classLinksModal');
+
+            const classStudents = students.filter(s => (s.className || '1/1') === className);
+            if (classStudents.length === 0) {
+                showToast(`لا توجد سجلات طلاب مسجلة لفصل (${className}) حالياً.`, "error");
+                return;
+            }
+
+            const baseUrl = window.location.href.split('#')[0];
+            let textOutput = `🔗 روابط تقارير طلاب الفصل (${className}) - أ / خالد بن محمد الشثري\n-----------------------------------\n`;
+            
+            classStudents.forEach((st, idx) => {
+                const reportUrl = `${baseUrl}#report=${encodeURIComponent(st.email.trim())}`;
+                textOutput += `${idx + 1}. ${st.name}: ${reportUrl}\n`;
+            });
+
+            navigator.clipboard.writeText(textOutput).then(() => {
+                showToast(`تم نسخ روابط تقارير جميع طلاب الفصل (${className}) بنجاح! 📋`);
+            });
         }
     </script>
 </body>
